@@ -1,0 +1,75 @@
+.list_app {
+    padding: 0 100px;
+
+    .btn_create_list {
+        display: flex;
+        justify-content: flex-end;
+        padding-top: 12px;
+
+        .btn_create_list {
+            border-radius: 20px;
+            border: 1px solid #36867b;
+            background: #36867b;
+            color: #fff;
+            font-size: 12px;
+            font-weight: 700;
+            padding: 12px 30px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            border-color: #fff;
+        }
+    }
+
+}
+
+
+.form-register {
+    .field {
+        width: 100%;
+        padding: 10px 15px;
+        background-color: #eee;
+        border: none;
+        margin-bottom: 16px;
+    }
+
+    .error-message {
+        text-align: left;
+        color: rgba(240, 23, 23, 0.835);
+        width: 100%;
+        font-size: 15px;
+        padding-bottom: 12px;
+    }
+}
+
+.form_contact_container {
+    .title {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding-bottom: 12px;
+        font-size: 15px !important;
+        font-weight: 600 !important;
+        color: #252525 !important;
+        text-transform: uppercase !important;
+    }
+
+    .btn_reg {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+
+        .btn-register {
+            border-radius: 20px;
+            border: 1px solid #36867b;
+            background: #36867b;
+            color: #fff;
+            font-size: 12px;
+            font-weight: 700;
+            padding: 12px 45px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-top: 15px;
+        }
+    }
+
+}
