@@ -129,7 +129,8 @@ const EmployeeListPage = () => {
                             <input type="text" className='field' {...register('name')} placeholder='Name' />
                             {errors.name && <p className="error-message">{errors.name.message}</p>}
                         </div>
-                        <div>
+                        <div className='date_of_birth_container'>
+                            <div> Date Of Birth :</div>
                             <Controller
                                 name="dateOfBirth"
                                 control={control}
