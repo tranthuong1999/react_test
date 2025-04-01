@@ -22,7 +22,7 @@ const style = {
     borderRadius: 1,
     backgroundColor: " #fff",
     // height: "40vh",
-    width: "80vh",
+    // width: "80vh",
     zIndex: 1
 };
 

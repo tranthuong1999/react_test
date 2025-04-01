@@ -146,8 +146,8 @@ const EmployeeListPage = () => {
                                     />
                                 )}
                             />
-                            {errors.dateOfBirth && <p className="error-message">{errors.dateOfBirth.message}</p>}
                         </div>
+                        {errors.dateOfBirth && <p className="error-message">{errors.dateOfBirth.message}</p>}
                         <div className="gender-container">
                             <FormControl>
                                 <FormLabel>Gender:</FormLabel>
