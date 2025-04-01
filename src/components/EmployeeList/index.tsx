@@ -249,19 +249,21 @@ const EmployeeListPage = () => {
                     + Create user
                 </button>
             </div>
-            <TableContainer component={Paper}>
+            <TableContainer component={Paper} className='table_container'>
                 <Table>
                     <TableHead>
+                        {/* <TableRow sx={{ borderBottom: "1px solid #ececec" }}> */}
                         <TableRow>
-                            <TableCell onClick={() => handleSort('name')} style={{ cursor: 'pointer' }}>
+                            <TableCell className='table_title' onClick={() => handleSort('name')} style={{ cursor: 'pointer' }}>
                                 Name {sortColumn === 'name' ? (sortOrder === 'asc' ? '⬆' : '⬇') : '⬆'}
                             </TableCell>
-                            <TableCell>DateOfBirth</TableCell>
-                            <TableCell>Gender</TableCell>
-                            <TableCell>Email</TableCell>
-                            <TableCell onClick={() => handleSort('address')} style={{ cursor: 'pointer' }}>
+                            <TableCell className='table_title'>DateOfBirth</TableCell>
+                            <TableCell className='table_title'>Gender</TableCell>
+                            <TableCell className='table_title'>Email</TableCell>
+                            <TableCell className='table_title' onClick={() => handleSort('address')} style={{ cursor: 'pointer' }}>
                                 Address {sortColumn === 'address' ? (sortOrder === 'asc' ? '⬆' : '⬇') : '⬆'}
                             </TableCell>
+                            <TableCell className='table_title'>Action</TableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>
