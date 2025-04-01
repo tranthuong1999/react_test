@@ -108,9 +108,10 @@ const EmployeeListPage = () => {
         }
         const updatedData = { ...editItem, ...data };
         const { _id, ...dataUpdate } = updatedData;
-        dispatch(updateEmployeer({ id: _id!, dataUpdate })).then(() => {
-            dispatch(fetchListEmployeer({ page: currentPage, limit: PAGE_LIMIT }));
-        });
+        dispatch(updateEmployeer({ id: _id!, dataUpdate }))
+        // .then(() => {
+        //     dispatch(fetchListEmployeer({ page: currentPage, limit: PAGE_LIMIT }));
+        // });
         setOpenContact(false);
         setEditItem(null);
         showAlert("Update user successful!");
@@ -252,7 +253,6 @@ const EmployeeListPage = () => {
             <TableContainer component={Paper} className='table_container'>
                 <Table>
                     <TableHead>
-                        {/* <TableRow sx={{ borderBottom: "1px solid #ececec" }}> */}
                         <TableRow>
                             <TableCell className='table_title' onClick={() => handleSort('name')} style={{ cursor: 'pointer' }}>
                                 Name {sortColumn === 'name' ? (sortOrder === 'asc' ? '⬆' : '⬇') : '⬆'}
