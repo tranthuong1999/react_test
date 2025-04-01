@@ -104,10 +104,18 @@
         }
     }
 
+    .gender-container {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 12px 0;
+    }
+
     .btn_reg {
         display: flex;
         justify-content: center;
         align-items: center;
+        padding: 16px 0;
 
         .btn-register {
             display: inline-flex;

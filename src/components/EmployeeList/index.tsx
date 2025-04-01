@@ -3,7 +3,7 @@ import { useForm, Controller } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as Yup from 'yup';
 import BasicModal from '../Modal';
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Button, Radio, RadioGroup, FormControl, FormControlLabel, FormLabel } from '@mui/material';
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Button, Radio, RadioGroup, FormControl, FormControlLabel, FormLabel, MenuItem } from '@mui/material';
 import { DatePicker } from 'rsuite'; // Import DatePicker from rsuite
 import { useAppDispatch, useAppSelector } from '../../redux/hook';
 import { fetchListEmployeer, createEmployeer, updateEmployeer, deleteEmployeer, setCurrentUser, Employee } from '../../redux/slice/employeer.slice';
@@ -11,6 +11,9 @@ import CustomAlert from '../Alert';
 import "./styles.scss";
 import 'rsuite/dist/rsuite.min.css';
 import moment from 'moment';
+import Select from 'react-select';
+import { provinces } from './data_province';
+
 
 const schema_employeer = Yup.object().shape({
     name: Yup.string().required('Name is required'),
@@ -28,7 +31,7 @@ enum Gender {
 const EmployeeListPage = () => {
     const [openContact, setOpenContact] = useState(false);
     const [editItem, setEditItem] = useState<Employee | null>(null);
-    const { register, reset, handleSubmit, formState: { errors }, setValue, control } = useForm({
+    const { register, reset, handleSubmit, formState: { errors }, setValue, control, clearErrors } = useForm({
         resolver: yupResolver(schema_employeer),
     });
     const dispatch = useAppDispatch();
@@ -37,9 +40,11 @@ const EmployeeListPage = () => {
     const [isDelete, setIsDelete] = useState(false);
     const [sortColumn, setSortColumn] = useState<keyof Employee>('name');
     const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
+    const [currentPage, setCurrentPage] = useState(1);
+    const PAGE_LIMIT = 10;
 
     useEffect(() => {
-        dispatch(fetchListEmployeer({ page: 1, limit: 15 }));
+        dispatch(fetchListEmployeer({ page: currentPage, limit: PAGE_LIMIT }));
     }, []);
 
     useEffect(() => {
@@ -69,6 +74,7 @@ const EmployeeListPage = () => {
     };
 
     const handleEdit = (item: Employee) => {
+        clearErrors();
         setEditItem(item);
         setOpenContact(true);
         setValue("name", item.name);
@@ -76,7 +82,8 @@ const EmployeeListPage = () => {
         setValue("dateOfBirth", item.dateOfBirth ? moment(item.dateOfBirth).valueOf() : null);
         setValue("gender", Number(item.gender));
         setValue("email", item.email);
-        setValue("address", item?.address!);
+        const selectedProvince = provinces.find(province => province.value === item.address);
+        setValue("address", selectedProvince?.value!)
     };
 
     const onSubmitForm = (data: any) => {
@@ -115,8 +122,6 @@ const EmployeeListPage = () => {
                                 render={({ field }) => (
                                     <DatePicker
                                         {...field}
-                                        // label="Date of Birth"
-                                        // format="yyyMM-dd"
                                         format="dd.MM.yyyy"
                                         value={field.value ? moment(field.value).toDate() : null}
                                         onChange={(value) => {
@@ -128,31 +133,50 @@ const EmployeeListPage = () => {
                             />
                             {errors.dateOfBirth && <p className="error-message">{errors.dateOfBirth.message}</p>}
                         </div>
-                        <div>
+                        <div className="gender-container">
                             <FormControl>
-                                <FormLabel>Gender</FormLabel>
-                                <Controller
-                                    name="gender"
-                                    control={control}
-                                    render={({ field }) => (
-                                        <RadioGroup {...field}
-                                            value={Number(field.value)} // Đảm bảo giá trị là số
-                                            onChange={(e) => field.onChange(Number(e.target.value))}
-                                        >
-                                            <FormControlLabel value={Gender.Male} control={<Radio />} label="Male" />
-                                            <FormControlLabel value={Gender.Female} control={<Radio />} label="Female" />
-                                        </RadioGroup>
-                                    )}
-                                />
+                                <FormLabel>Gender:</FormLabel>
                             </FormControl>
-                            {errors.gender && <p className="error-message">{errors.gender.message}</p>}
+                            <Controller
+                                name="gender"
+                                control={control}
+                                render={({ field }) => (
+                                    <RadioGroup
+                                        {...field}
+                                        value={Number(field.value)}
+                                        onChange={(e) => field.onChange(Number(e.target.value))}
+                                        row // Thêm thuộc tính này để hiển thị radio theo hàng ngang
+                                        sx={{ gap: 8 }}
+                                    >
+                                        <FormControlLabel value={Gender.Male} control={<Radio />} label="Male" />
+                                        <FormControlLabel value={Gender.Female} control={<Radio />} label="Female" />
+                                    </RadioGroup>
+                                )}
+                            />
                         </div>
+                        {errors.gender && <p className="error-message">{errors.gender.message}</p>}
                         <div>
                             <input type="text" className='field' {...register('email')} placeholder='Email' />
                             {errors.email && <p className="error-message">{errors.email.message}</p>}
                         </div>
                         <div>
-                            <input type="text" className='field' {...register('address')} placeholder='Address' />
+                            <Controller
+                                name="address"
+                                control={control}
+                                render={({ field }) => (
+                                    <Select
+                                        {...field}
+                                        // @ts-ignore
+                                        options={provinces}
+                                        placeholder="Select a province"
+                                        // @ts-ignore
+                                        value={provinces.find(option => option.value === field.value)} // Sửa cách tìm giá trị đã chọn
+                                        // @ts-ignore
+                                        onChange={(selectedOption) => field.onChange(selectedOption?.value)}  // Chọn tỉnh và lấy giá trị
+                                        isSearchable  // Cho phép tìm kiếm trong dropdown
+                                    />
+                                )}
+                            />
                             {errors.address && <p className="error-message">{errors.address.message}</p>}
                         </div>
                         <div className='btn_reg'>
