@@ -2,87 +2,149 @@ import React, { useEffect, useState } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as Yup from 'yup';
-import { FormControl } from '@mui/material';
 import BasicModal from '../Modal';
-import "./styles.scss";
-import { v4 as uuidv4 } from 'uuid';
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Button } from '@mui/material';
-import Select from '@mui/material/Select';
-import MenuItem from '@mui/material/MenuItem';
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Button, Radio, RadioGroup, FormControl, FormControlLabel, FormLabel } from '@mui/material';
+import { DatePicker } from 'rsuite'; // Import DatePicker from rsuite
 import { useAppDispatch, useAppSelector } from '../../redux/hook';
-import { fetchListEmployeer, createEmployeer, updateEmployeer, deleteEmployeer } from '../../redux/slice/employeer.slice';
+import { fetchListEmployeer, createEmployeer, updateEmployeer, deleteEmployeer, setCurrentUser, Employee } from '../../redux/slice/employeer.slice';
+import CustomAlert from '../Alert';
+import "./styles.scss";
+import 'rsuite/dist/rsuite.min.css';
+import moment from 'moment';
 
 const schema_employeer = Yup.object().shape({
-    name: Yup.string()
-        .required('Name is required'),
-    dateOfBirth: Yup.string()
-        .required('Name is required'),
-    gender: Yup.string()
-        .required('Name is required'),
-    email: Yup.string()
-        .required('Name is required'),
-    address: Yup.string()
-        .required('Name is required'),
+    name: Yup.string().required('Name is required'),
+    dateOfBirth: Yup.number().required('DateOfBirth is required'),
+    gender: Yup.number().required('Gender is required'),
+    email: Yup.string().email('Invalid email').required('Email is required'),
+    address: Yup.string().required('Adress is required'),
 });
 
-const Appbar = () => {
+enum Gender {
+    Male = 0,
+    Female = 1
+}
+
+const EmployeeListPage = () => {
     const [openContact, setOpenContact] = useState(false);
-    const [editItem, setEditItem] = useState<any>(null);
-    const { register, reset, handleSubmit, formState: { errors }, setValue } = useForm({
+    const [editItem, setEditItem] = useState<Employee | null>(null);
+    const { register, reset, handleSubmit, formState: { errors }, setValue, control } = useForm({
         resolver: yupResolver(schema_employeer),
     });
     const dispatch = useAppDispatch();
-    const { listEmployeer } = useAppSelector(state => state.employeerReducer)
+    const { listEmployeer, currentUser } = useAppSelector(state => state.employeerReducer)
+    const [alertMessage, setAlertMessage] = useState<string | null>(null);
+    const [isDelete, setIsDelete] = useState(false);
+    const [sortColumn, setSortColumn] = useState<keyof Employee>('name');
+    const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
 
+    useEffect(() => {
+        dispatch(fetchListEmployeer({ page: 1, limit: 15 }));
+    }, []);
 
-    const handleEdit = (item: any) => {
+    useEffect(() => {
+        setSortColumn("name");
+        setSortOrder("asc");
+    }, []);
+
+    const handleSort = (column: keyof Employee) => {
+        if (sortColumn === column) {
+            setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+        } else {
+            setSortColumn(column);
+            setSortOrder('asc');
+        }
+    };
+
+    const sortedEmployees = [...(listEmployeer || [])].sort((a, b) => {
+        if (!sortColumn) return 0;
+        const valueA = a[sortColumn] ? a[sortColumn].toString().toLowerCase() : '';
+        const valueB = b[sortColumn] ? b[sortColumn].toString().toLowerCase() : '';
+
+        return sortOrder === 'asc' ? valueA.localeCompare(valueB) : valueB.localeCompare(valueA);
+    });
+
+    const showAlert = (message: string) => {
+        setAlertMessage(message);
+    };
+
+    const handleEdit = (item: Employee) => {
         setEditItem(item);
         setOpenContact(true);
         setValue("name", item.name);
-        setValue("dateOfBirth", item.dateOfBirth);
-        setValue("gender", item.gender);
+        // @ts-ignore
+        setValue("dateOfBirth", item.dateOfBirth ? moment(item.dateOfBirth).valueOf() : null);
+        setValue("gender", Number(item.gender));
         setValue("email", item.email);
-        setValue("address", item.address);
+        setValue("address", item?.address!);
     };
 
     const onSubmitForm = (data: any) => {
         if (!editItem) {
-            dispatch(createEmployeer(data))
+            dispatch(createEmployeer(data));
             setOpenContact(false);
+            showAlert("Create user successful!");
             reset();
             return;
         }
         const updatedData = { ...editItem, ...data };
         const { _id, ...dataUpdate } = updatedData;
-        dispatch(updateEmployeer({ id: _id, dataUpdate }));
+        dispatch(updateEmployeer({ id: _id!, dataUpdate }));
         setOpenContact(false);
         setEditItem(null);
+        showAlert("Update user successful!");
         reset();
     };
-
-    useEffect(() => {
-        dispatch(fetchListEmployeer({ page: 1, limit: 15 }));
-    }, [])
-
-
 
     const renderFormContact = () => {
         return (
             <div className='form_contact_container'>
-                {!editItem ? <h1 className='title'> Create contact</h1> : <h1 className='title'> Update contact</h1>}
+                <h1 className={`title ${editItem ? "update" : "create"}`}>
+                    {!editItem ? "Create User" : "Update User"}
+                </h1>
                 <form onSubmit={handleSubmit(onSubmitForm)} className='form-login'>
-
                     <div className='form-register'>
                         <div>
                             <input type="text" className='field' {...register('name')} placeholder='Name' />
                             {errors.name && <p className="error-message">{errors.name.message}</p>}
                         </div>
                         <div>
-                            <input type="text" className='field' {...register('dateOfBirth')} placeholder='Date Of Birth' />
+                            <Controller
+                                name="dateOfBirth"
+                                control={control}
+                                render={({ field }) => (
+                                    <DatePicker
+                                        {...field}
+                                        // label="Date of Birth"
+                                        // format="yyyMM-dd"
+                                        format="dd.MM.yyyy"
+                                        value={field.value ? moment(field.value).toDate() : null}
+                                        onChange={(value) => {
+                                            field.onChange(moment(value).valueOf()); // Chuyển đổi thành timestamp
+                                        }}
+                                        cleanable={false}  // Makes the input field non-clearable
+                                    />
+                                )}
+                            />
                             {errors.dateOfBirth && <p className="error-message">{errors.dateOfBirth.message}</p>}
                         </div>
                         <div>
-                            <input type="text" className='field' {...register('gender')} placeholder='Gender' />
+                            <FormControl>
+                                <FormLabel>Gender</FormLabel>
+                                <Controller
+                                    name="gender"
+                                    control={control}
+                                    render={({ field }) => (
+                                        <RadioGroup {...field}
+                                            value={Number(field.value)} // Đảm bảo giá trị là số
+                                            onChange={(e) => field.onChange(Number(e.target.value))}
+                                        >
+                                            <FormControlLabel value={Gender.Male} control={<Radio />} label="Male" />
+                                            <FormControlLabel value={Gender.Female} control={<Radio />} label="Female" />
+                                        </RadioGroup>
+                                    )}
+                                />
+                            </FormControl>
                             {errors.gender && <p className="error-message">{errors.gender.message}</p>}
                         </div>
                         <div>
@@ -90,12 +152,12 @@ const Appbar = () => {
                             {errors.email && <p className="error-message">{errors.email.message}</p>}
                         </div>
                         <div>
-                            <input type="text" className='field' {...register('address')} placeholder='address' />
+                            <input type="text" className='field' {...register('address')} placeholder='Address' />
                             {errors.address && <p className="error-message">{errors.address.message}</p>}
                         </div>
                         <div className='btn_reg'>
-                            <button type="submit" className='btn-register'>
-                                {!editItem ? <div> Create contact</div> : <div> Update Contact</div>}
+                            <button type="submit" className={`btn-register ${editItem ? "update" : "create"}`}>
+                                {!editItem ? <div> Create user</div> : <div> Update User</div>}
                             </button>
                         </div>
                     </div>
@@ -104,42 +166,78 @@ const Appbar = () => {
         );
     };
 
+    const handleDeleteUser = () => {
+        if (!!currentUser && !!currentUser._id) {
+            dispatch(deleteEmployeer(currentUser._id));
+            setIsDelete(false);
+        }
+    };
+
+    const renderFormDelete = () => {
+        return (
+            <div className="form_delete_user">
+                <h2 className='delete_title'> Bạn có chắc chắn muốn xoá nhân viên <span>{currentUser?.name}</span> không ? </h2>
+                <div className='btn_action'>
+                    <button className='yes-btn' onClick={handleDeleteUser}> Yes</button>
+                    <button className='no-btn' onClick={() => setIsDelete(false)}> No</button>
+                </div>
+            </div>
+        );
+    };
+
     return (
         <div className='list_app'>
-            <div className='btn_create_list'>
-                <button className='btn_create_list' onClick={() => setOpenContact(true)}>+ Create list</button>
+            {alertMessage && <CustomAlert text={alertMessage} onClose={() => setAlertMessage(null)} />}
+            <div className='btn_create_list_title'>
+                <button
+                    className='btn_create_list'
+                    onClick={() => {
+                        setEditItem(null);
+                        reset();
+                        setOpenContact(true);
+                    }}
+                >
+                    + Create user
+                </button>
             </div>
-            <TableContainer component={Paper} style={{ marginTop: 20 }}>
+            <TableContainer component={Paper}>
                 <Table>
                     <TableHead>
                         <TableRow>
-                            <TableCell>Name</TableCell>
+                            <TableCell onClick={() => handleSort('name')} style={{ cursor: 'pointer' }}>
+                                Name {sortColumn === 'name' ? (sortOrder === 'asc' ? '⬆' : '⬇') : '⬆'}
+                            </TableCell>
                             <TableCell>DateOfBirth</TableCell>
                             <TableCell>Gender</TableCell>
                             <TableCell>Email</TableCell>
-                            <TableCell>Address</TableCell>
+                            <TableCell onClick={() => handleSort('address')} style={{ cursor: 'pointer' }}>
+                                Address {sortColumn === 'address' ? (sortOrder === 'asc' ? '⬆' : '⬇') : '⬆'}
+                            </TableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {listEmployeer?.length > 0 && listEmployeer?.map((item: any) => (
+                        {sortedEmployees?.length > 0 && sortedEmployees?.map((item: any) => (
                             <TableRow key={item.id}>
                                 <TableCell>{item.name}</TableCell>
-                                <TableCell>{item.dateOfBirth}</TableCell>
-                                <TableCell>{item.gender}</TableCell>
+                                <TableCell>{moment(item.dateOfBirth).format("DD/MM/YYYY")}</TableCell>
+                                <TableCell>{item.gender === Gender.Male ? "Nam" : "Nữ"}</TableCell>
                                 <TableCell>{item.email}</TableCell>
                                 <TableCell>{item.address}</TableCell>
                                 <TableCell>
-                                    {item.sub_field !== "#" && (
-                                        <>
-                                            <Button variant="contained" color="primary" size="small" onClick={() => handleEdit(item)}>
-                                                Edit
-                                            </Button>
-
-                                            <Button variant="contained" color="secondary" size="small" onClick={() => dispatch(deleteEmployeer(item._id))} style={{ marginLeft: 10 }}>
-                                                Delete
-                                            </Button>
-                                        </>
-                                    )}
+                                    <div className="table-buttons">
+                                        <button className="edit-btn" onClick={() => handleEdit(item)}>
+                                            Edit
+                                        </button>
+                                        <button
+                                            onClick={() => {
+                                                setIsDelete(true);
+                                                dispatch(setCurrentUser(item));
+                                            }}
+                                            className="delete-btn"
+                                        >
+                                            Delete
+                                        </button>
+                                    </div>
                                 </TableCell>
                             </TableRow>
                         ))}
@@ -151,8 +249,13 @@ const Appbar = () => {
                 onClose={() => setOpenContact(false)}
                 content={renderFormContact()}
             />
+            <BasicModal
+                open={isDelete}
+                onClose={() => setIsDelete(false)}
+                content={renderFormDelete()}
+            />
         </div>
     );
 };
 
-export default Appbar;
+export default EmployeeListPage;

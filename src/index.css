@@ -3,3 +3,15 @@
   padding: 0;
   box-sizing: border-box;
 }
+
+/* CSS của bạn (thêm vào file CSS hoặc styled-components) */
+
+/* Đảm bảo rằng modal có z-index cao để luôn ở trên */
+.rsuite-modal {
+  z-index: 1050 !important;  /* Điều chỉnh z-index của modal */
+}
+
+/* Đảm bảo rằng DatePicker có z-index thấp hơn để nó không bị che khuất */
+.rsuite-picker-dropdown {
+  z-index: 1060 !important;  /* Đặt z-index của DatePicker lớn hơn modal */
+}

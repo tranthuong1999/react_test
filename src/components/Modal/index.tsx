@@ -15,14 +15,15 @@ const style = {
     minWidth: 400,
     bgcolor: 'background.paper',
     boxShadow: 24,
-    p: 4,
-    minHeight: 400,
+    padding : "16px 32px",
+    // minHeight: 400,
     outline: 0,
     border: null,
     borderRadius: 1,
     backgroundColor: " #fff",
     // height: "40vh",
-    width: "80vh"
+    width: "80vh",
+    zIndex: 1
 };
 
 export default function BasicModal(props: { open: boolean, onClose?: () => void, width?: string, content?: any }) {

@@ -1,8 +1,8 @@
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { apiCreateEmployee, apiDeleteEmployee, apiGetEmployees, apiUpdateEmployee } from "../../apis/employeer.api";
 
-type Employee = {
-    _id: string;
+export type Employee = {
+    _id?: string;
     name: string;
     dateOfBirth: number;
     gender: number;
@@ -14,7 +14,7 @@ interface EmployeerState {
     listEmployeer: any;
     loading: boolean;
     error: string | null;
-    user: {}
+    currentUser: Employee | null
 }
 
 // Khởi tạo state ban đầu
@@ -22,7 +22,7 @@ const initialState: EmployeerState = {
     listEmployeer: null,
     loading: false,
     error: null,
-    user: {}
+    currentUser: null
 };
 
 
@@ -60,7 +60,11 @@ export const createEmployeer = employeerAsyncThunk.createEmployeer;
 const employeerSlice = createSlice({
     name: "employeerSlice",
     initialState,
-    reducers: {},
+    reducers: {
+        setCurrentUser: (state, action: PayloadAction<Employee>) => {
+            state.currentUser = action.payload;
+        },
+    },
     extraReducers: (builder) => {
         builder
             .addCase(fetchListEmployeer.pending, (state) => {
@@ -94,5 +98,6 @@ const employeerSlice = createSlice({
             })
     },
 });
+export const { setCurrentUser } = employeerSlice.actions;
 
 export default employeerSlice.reducer;
