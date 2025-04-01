@@ -92,11 +92,11 @@ const EmployeeListPage = () => {
             dispatch(createEmployeer(data))
                 .then((result: any) => {
                     if (result.error) {
-                        showAlert("Create user failed . Email is exited");
+                        showAlert("Create user failed.Email is exited");
                         setIsRed(true)
                     }
                     else {
-                        showAlert("Create user successful!");
+                        showAlert("Create user successful");
                     }
                 })
             // .then(() => {
