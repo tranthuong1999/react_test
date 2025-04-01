@@ -3,7 +3,7 @@ import { useForm, Controller } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as Yup from 'yup';
 import BasicModal from '../Modal';
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Button, Radio, RadioGroup, FormControl, FormControlLabel, FormLabel, MenuItem } from '@mui/material';
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Radio, RadioGroup, FormControl, FormControlLabel, FormLabel, MenuItem } from '@mui/material';
 import { DatePicker } from 'rsuite'; // Import DatePicker from rsuite
 import { useAppDispatch, useAppSelector } from '../../redux/hook';
 import { fetchListEmployeer, createEmployeer, updateEmployeer, deleteEmployeer, setCurrentUser, Employee } from '../../redux/slice/employeer.slice';
@@ -13,7 +13,7 @@ import 'rsuite/dist/rsuite.min.css';
 import moment from 'moment';
 import Select from 'react-select';
 import { provinces } from './data_province';
-
+import Pagination from '@mui/material/Pagination';
 
 const schema_employeer = Yup.object().shape({
     name: Yup.string().required('Name is required'),
@@ -35,13 +35,14 @@ const EmployeeListPage = () => {
         resolver: yupResolver(schema_employeer),
     });
     const dispatch = useAppDispatch();
-    const { listEmployeer, currentUser } = useAppSelector(state => state.employeerReducer)
+    const { listEmployeer, currentUser, totalPages } = useAppSelector(state => state.employeerReducer)
     const [alertMessage, setAlertMessage] = useState<string | null>(null);
     const [isDelete, setIsDelete] = useState(false);
     const [sortColumn, setSortColumn] = useState<keyof Employee>('name');
     const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
     const [currentPage, setCurrentPage] = useState(1);
-    const PAGE_LIMIT = 10;
+    const PAGE_LIMIT = 15;
+    const [isRed, setIsRed] = useState(false);
 
     useEffect(() => {
         dispatch(fetchListEmployeer({ page: currentPage, limit: PAGE_LIMIT }));
@@ -88,15 +89,28 @@ const EmployeeListPage = () => {
 
     const onSubmitForm = (data: any) => {
         if (!editItem) {
-            dispatch(createEmployeer(data));
+            dispatch(createEmployeer(data))
+                .then((result: any) => {
+                    if (result.error) {
+                        showAlert("Create user failed . Email is exited");
+                        setIsRed(true)
+                    }
+                    else {
+                        showAlert("Create user successful!");
+                    }
+                })
+            // .then(() => {
+            //     dispatch(fetchListEmployeer({ page: currentPage, limit: PAGE_LIMIT }));
+            // });
             setOpenContact(false);
-            showAlert("Create user successful!");
             reset();
             return;
         }
         const updatedData = { ...editItem, ...data };
         const { _id, ...dataUpdate } = updatedData;
-        dispatch(updateEmployeer({ id: _id!, dataUpdate }));
+        dispatch(updateEmployeer({ id: _id!, dataUpdate })).then(() => {
+            dispatch(fetchListEmployeer({ page: currentPage, limit: PAGE_LIMIT }));
+        });
         setOpenContact(false);
         setEditItem(null);
         showAlert("Update user successful!");
@@ -192,7 +206,12 @@ const EmployeeListPage = () => {
 
     const handleDeleteUser = () => {
         if (!!currentUser && !!currentUser._id) {
-            dispatch(deleteEmployeer(currentUser._id));
+            dispatch(deleteEmployeer(currentUser._id))
+                .then(() => {
+                    const newTotalPages = Math.ceil((listEmployeer.length - 1) / PAGE_LIMIT);
+                    setCurrentPage((prevPage) => (prevPage > newTotalPages ? newTotalPages : prevPage));
+                    dispatch(fetchListEmployeer({ page: currentPage, limit: PAGE_LIMIT }));
+                });
             setIsDelete(false);
         }
     };
@@ -211,7 +230,12 @@ const EmployeeListPage = () => {
 
     return (
         <div className='list_app'>
-            {alertMessage && <CustomAlert text={alertMessage} onClose={() => setAlertMessage(null)} />}
+            {alertMessage && <CustomAlert text={alertMessage} severity={isRed ? "error" : 'success'}
+                onClose={() => {
+                    setAlertMessage(null)
+                    setIsRed(false)
+                }}
+            />}
             <div className='btn_create_list_title'>
                 <button
                     className='btn_create_list'
@@ -268,6 +292,18 @@ const EmployeeListPage = () => {
                     </TableBody>
                 </Table>
             </TableContainer>
+            <Pagination
+                count={totalPages}
+                page={currentPage}
+                onChange={(event, page) => {
+                    setCurrentPage(page);
+                    dispatch(fetchListEmployeer({ page: page, limit: PAGE_LIMIT }));
+                    setSortColumn("name");
+                    setSortOrder("asc");
+                }}
+                color="primary"
+                sx={{ mt: 2, display: 'flex', justifyContent: 'center' }}
+            />
             <BasicModal
                 open={openContact}
                 onClose={() => setOpenContact(false)}

@@ -14,7 +14,8 @@ interface EmployeerState {
     listEmployeer: any;
     loading: boolean;
     error: string | null;
-    currentUser: Employee | null
+    currentUser: Employee | null;
+    totalPages: number | undefined
 }
 
 // Khởi tạo state ban đầu
@@ -22,7 +23,8 @@ const initialState: EmployeerState = {
     listEmployeer: null,
     loading: false,
     error: null,
-    currentUser: null
+    currentUser: null,
+    totalPages: undefined
 };
 
 
@@ -75,6 +77,7 @@ const employeerSlice = createSlice({
                 console.log("listEmployeer fullfield", action.payload)
                 state.loading = false;
                 state.listEmployeer = action.payload.data;
+                state.totalPages = action.payload.totalPages;
             })
             .addCase(fetchListEmployeer.rejected, (state, action: PayloadAction<any>) => {
                 state.loading = false;

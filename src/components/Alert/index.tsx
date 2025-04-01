@@ -8,9 +8,10 @@ import "./style.scss";
 interface CustomAlertProps {
     text?: string;
     onClose: () => void;
+    severity?: "success" | "error" | "warning" | "info";
 }
 
-const CustomAlert: React.FC<CustomAlertProps> = ({ text, onClose }) => {
+const CustomAlert: React.FC<CustomAlertProps> = ({ text, onClose, severity = "success" }) => {
 
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -22,7 +23,7 @@ const CustomAlert: React.FC<CustomAlertProps> = ({ text, onClose }) => {
 
     return (
         <div className="custom_alert">
-            <Alert icon={<CheckIcon fontSize="inherit" />} severity="success" onClose={onClose} >
+            <Alert icon={<CheckIcon fontSize="inherit" />} severity={severity} onClose={onClose} >
                 {text}
             </Alert>
         </div>
