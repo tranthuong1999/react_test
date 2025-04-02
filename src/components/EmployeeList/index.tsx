@@ -3,7 +3,7 @@ import { useForm, Controller } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as Yup from 'yup';
 import BasicModal from '../Modal';
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Radio, RadioGroup, FormControl, FormControlLabel, FormLabel, MenuItem } from '@mui/material';
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Radio, RadioGroup, FormControl, FormControlLabel, FormLabel, MenuItem, TableSortLabel } from '@mui/material';
 import { DatePicker } from 'rsuite'; // Import DatePicker from rsuite
 import { useAppDispatch, useAppSelector } from '../../redux/hook';
 import { fetchListEmployeer, createEmployeer, updateEmployeer, deleteEmployeer, setCurrentUser, Employee } from '../../redux/slice/employeer.slice';
@@ -38,37 +38,15 @@ const EmployeeListPage = () => {
     const { listEmployeer, currentUser, totalPages } = useAppSelector(state => state.employeerReducer)
     const [alertMessage, setAlertMessage] = useState<string | null>(null);
     const [isDelete, setIsDelete] = useState(false);
-    const [sortColumn, setSortColumn] = useState<keyof Employee>('name');
-    const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
     const [currentPage, setCurrentPage] = useState(1);
     const PAGE_LIMIT = 15;
     const [isRed, setIsRed] = useState(false);
+    const [order, setOrder] = useState<("asc" | "desc")[]>([]);
+    const [orderBy, setOrderBy] = useState<string[]>([]);
 
     useEffect(() => {
         dispatch(fetchListEmployeer({ page: currentPage, limit: PAGE_LIMIT }));
     }, []);
-
-    useEffect(() => {
-        setSortColumn("name");
-        setSortOrder("asc");
-    }, []);
-
-    const handleSort = (column: keyof Employee) => {
-        if (sortColumn === column) {
-            setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
-        } else {
-            setSortColumn(column);
-            setSortOrder('asc');
-        }
-    };
-
-    const sortedEmployees = [...(listEmployeer || [])].sort((a, b) => {
-        if (!sortColumn) return 0;
-        const valueA = a[sortColumn] ? a[sortColumn].toString().toLowerCase() : '';
-        const valueB = b[sortColumn] ? b[sortColumn].toString().toLowerCase() : '';
-
-        return sortOrder === 'asc' ? valueA.localeCompare(valueB) : valueB.localeCompare(valueA);
-    });
 
     const showAlert = (message: string) => {
         setAlertMessage(message);
@@ -99,9 +77,6 @@ const EmployeeListPage = () => {
                         showAlert("Create user successful");
                     }
                 })
-            // .then(() => {
-            //     dispatch(fetchListEmployeer({ page: currentPage, limit: PAGE_LIMIT }));
-            // });
             setOpenContact(false);
             reset();
             return;
@@ -109,9 +84,6 @@ const EmployeeListPage = () => {
         const updatedData = { ...editItem, ...data };
         const { _id, ...dataUpdate } = updatedData;
         dispatch(updateEmployeer({ id: _id!, dataUpdate }))
-        // .then(() => {
-        //     dispatch(fetchListEmployeer({ page: currentPage, limit: PAGE_LIMIT }));
-        // });
         setOpenContact(false);
         setEditItem(null);
         showAlert("Update user successful!");
@@ -230,6 +202,27 @@ const EmployeeListPage = () => {
         );
     };
 
+    const handleRequestSort = (column: string) => {
+        setOrderBy((prevOrderBy) => {
+            const newOrderBy = [...prevOrderBy];
+            const newOrder = [...order];
+            const columnIndex = newOrderBy.indexOf(column);
+            if (columnIndex !== -1) {
+                // Nếu cột đã tồn tại, đảo ngược thứ tự sắp xếp
+                newOrder[columnIndex] = newOrder[columnIndex] === "asc" ? "desc" : "asc";
+            } else {
+                // Nếu chưa có, thêm mới với "asc"
+                newOrderBy.push(column);
+                newOrder.push("asc");
+            }
+            dispatch(fetchListEmployeer({ page: currentPage, limit: PAGE_LIMIT, sortFields: newOrderBy, sortOrders: newOrder }))
+            // console.log("newOrder---", newOrder)
+            // console.log("newOrderBy ---", newOrderBy)
+
+            setOrder(newOrder);
+            return newOrderBy;
+        });
+    };
     return (
         <div className='list_app'>
             {alertMessage && <CustomAlert text={alertMessage} severity={isRed ? "error" : 'success'}
@@ -254,20 +247,34 @@ const EmployeeListPage = () => {
                 <Table>
                     <TableHead>
                         <TableRow>
-                            <TableCell className='table_title' onClick={() => handleSort('name')} style={{ cursor: 'pointer' }}>
-                                Name {sortColumn === 'name' ? (sortOrder === 'asc' ? '⬆' : '⬇') : '⬆'}
+                            <TableCell
+                                className='table_title'
+                            >
+                                <TableSortLabel
+                                    active={orderBy.includes("name")}
+                                    direction={orderBy.includes("name") ? order[orderBy.indexOf("name")] : "asc"}
+                                    onClick={() => handleRequestSort("name")}
+                                >
+                                    Name
+                                </TableSortLabel>
                             </TableCell>
                             <TableCell className='table_title'>DateOfBirth</TableCell>
                             <TableCell className='table_title'>Gender</TableCell>
                             <TableCell className='table_title'>Email</TableCell>
-                            <TableCell className='table_title' onClick={() => handleSort('address')} style={{ cursor: 'pointer' }}>
-                                Address {sortColumn === 'address' ? (sortOrder === 'asc' ? '⬆' : '⬇') : '⬆'}
+                            <TableCell className='table_title'>
+                                <TableSortLabel
+                                    active={orderBy.includes("address")}
+                                    direction={orderBy.includes("address") ? order[orderBy.indexOf("address")] : "asc"}
+                                    onClick={() => handleRequestSort("address")}
+                                >
+                                    Address
+                                </TableSortLabel>
                             </TableCell>
                             <TableCell className='table_title'>Action</TableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {sortedEmployees?.length > 0 && sortedEmployees?.map((item: any) => (
+                        {!!listEmployeer && listEmployeer?.length > 0 && listEmployeer?.map((item: any) => (
                             <TableRow key={item.id}>
                                 <TableCell>{item.name}</TableCell>
                                 <TableCell>{moment(item.dateOfBirth).format("DD/MM/YYYY")}</TableCell>
@@ -301,8 +308,6 @@ const EmployeeListPage = () => {
                 onChange={(event, page) => {
                     setCurrentPage(page);
                     dispatch(fetchListEmployeer({ page: page, limit: PAGE_LIMIT }));
-                    setSortColumn("name");
-                    setSortOrder("asc");
                 }}
                 color="primary"
                 sx={{ mt: 2, display: 'flex', justifyContent: 'center' }}

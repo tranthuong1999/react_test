@@ -29,9 +29,9 @@ const initialState: EmployeerState = {
 
 
 class CategoryAsyncThunk {
-    fetchListEmployeer = createAsyncThunk(`employeer/listEmployeer`, async (props: { page: number, limit: number }) => {
-        const { page, limit } = props;
-        const result = await apiGetEmployees(page, limit);
+    fetchListEmployeer = createAsyncThunk(`employeer/listEmployeer`, async (props: { page: number, limit: number, sortFields?: string[], sortOrders?: ("asc" | "desc")[] }) => {
+        const { page, limit, sortFields, sortOrders } = props;
+        const result = await apiGetEmployees(page, limit, sortFields, sortOrders);
         return result;
     });
 
