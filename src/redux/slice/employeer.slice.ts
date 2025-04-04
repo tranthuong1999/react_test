@@ -15,7 +15,9 @@ interface EmployeerState {
     loading: boolean;
     error: string | null;
     currentUser: Employee | null;
-    totalPages: number | undefined
+    totalPages: number | undefined,
+    isCreateOrEditUser: boolean
+    currentPage: number
 }
 
 // Khởi tạo state ban đầu
@@ -24,7 +26,9 @@ const initialState: EmployeerState = {
     loading: false,
     error: null,
     currentUser: null,
-    totalPages: undefined
+    totalPages: undefined,
+    isCreateOrEditUser: false,
+    currentPage: 1
 };
 
 
@@ -63,8 +67,11 @@ const employeerSlice = createSlice({
     name: "employeerSlice",
     initialState,
     reducers: {
-        setCurrentUser: (state, action: PayloadAction<Employee>) => {
+        setCurrentUser: (state, action: PayloadAction<Employee | null>) => {
             state.currentUser = action.payload;
+        },
+        setIsCreateOrEditUser: (state, action: PayloadAction<any>) => {
+            state.isCreateOrEditUser = action.payload;
         },
     },
     extraReducers: (builder) => {
@@ -101,6 +108,6 @@ const employeerSlice = createSlice({
             })
     },
 });
-export const { setCurrentUser } = employeerSlice.actions;
+export const { setCurrentUser, setIsCreateOrEditUser } = employeerSlice.actions;
 
 export default employeerSlice.reducer;

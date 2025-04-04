@@ -1,0 +1,142 @@
+.user_table_page {
+
+    // padding: 50px;
+    .table_container {
+        width: 100%;
+        // max-width: 1200px;
+        margin: 20px auto;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background-color: #f5f5f5;
+
+            .table_title {
+                font-weight: bold;
+                text-transform: uppercase;
+                color: #333;
+                padding: 12px;
+                text-align: left;
+                border-bottom: 2px solid #ddd;
+            }
+        }
+
+        tbody {
+            tr {
+                transition: background 0.3s ease;
+
+                &:nth-child(even) {
+                    background-color: #f9f9f9;
+                }
+
+                &:hover {
+                    background-color: #eaeaea;
+                }
+
+                td {
+                    padding: 10px;
+                    border-bottom: 1px solid #ddd;
+                    color: #555;
+                }
+            }
+        }
+
+        .table-buttons {
+            display: flex;
+            gap: 8px;
+
+            button {
+                border: none;
+                padding: 6px 12px;
+                cursor: pointer;
+                border-radius: 4px;
+                transition: all 0.3s ease;
+                font-size: 14px;
+
+                &.edit-btn {
+                    background-color: #4CAF50;
+                    color: white;
+
+                    &:hover {
+                        background-color: #45a049;
+                    }
+                }
+
+                &.delete-btn {
+                    background-color: #f44336;
+                    color: white;
+
+                    &:hover {
+                        background-color: #d32f2f;
+                    }
+                }
+            }
+        }
+    }
+}
+
+.form_delete_user {
+    width: 100%;
+    max-width: 400px;
+    margin: 40px auto;
+    padding: 25px;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.15);
+    text-align: center;
+
+    .delete_title {
+        font-size: 20px;
+        font-weight: bold;
+        color: #333;
+        margin-bottom: 20px;
+        line-height: 1.4;
+
+        span {
+            color: #E53935;
+            font-weight: bold;
+        }
+    }
+
+    .btn_action {
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+        margin-top: 15px;
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: white;
+        }
+
+        .yes-btn {
+            background: #E53935;
+
+            &:hover {
+                background: #D32F2F;
+                transform: translateY(-2px);
+            }
+        }
+
+        .no-btn {
+            background: #757575;
+
+            &:hover {
+                background: #616161;
+                transform: translateY(-2px);
+            }
+        }
+    }
+}

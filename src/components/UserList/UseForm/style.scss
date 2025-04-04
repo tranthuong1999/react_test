@@ -1,0 +1,126 @@
+$form-bg: #f8f9fa;
+$primary-color: #4CAF50;
+$hover-color: #388E3C;
+$error-color: #E53935;
+$input-border: #ddd;
+
+.form_contact_container {
+    width: 100%;
+    max-width: 480px;
+    margin: 40px auto;
+    padding: 25px;
+    background: linear-gradient(135deg, #ffffff, #f1f1f1);
+    border-radius: 12px;
+    box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.1);
+    text-align: center;
+
+    .title {
+        font-size: 26px;
+        font-weight: bold;
+        margin-bottom: 20px;
+        letter-spacing: 1px;
+        color: $primary-color;
+
+        &.update {
+            color: #FF5722;
+        }
+    }
+
+    .form-login {
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+
+        .form-register {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+
+            .field {
+                width: 100%;
+                padding: 12px;
+                border-radius: 8px;
+                border: 2px solid $input-border;
+                font-size: 16px;
+                background: white;
+                transition: all 0.3s ease;
+
+                &:focus {
+                    border-color: $primary-color;
+                    box-shadow: 0px 0px 8px rgba(76, 175, 80, 0.4);
+                    outline: none;
+                }
+            }
+
+            .error-message {
+                font-size: 14px;
+                color: $error-color;
+                margin-top: 5px;
+                text-align: left;
+                font-weight: 500;
+            }
+
+            .date_of_birth_container {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                font-size: 16px;
+                color: #555;
+                background: #fff;
+                padding: 10px;
+                border-radius: 8px;
+                border: 2px solid $input-border;
+                transition: 0.3s ease;
+
+                &:hover {
+                    border-color: $primary-color;
+                }
+            }
+
+            .gender-container {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 15px;
+                font-size: 16px;
+                font-weight: bold;
+                color: #555;
+            }
+
+            .btn_reg {
+                text-align: center;
+                margin-top: 20px;
+
+                .btn-register {
+                    width: 100%;
+                    padding: 12px;
+                    font-size: 18px;
+                    font-weight: bold;
+                    border: none;
+                    border-radius: 8px;
+                    cursor: pointer;
+                    transition: all 0.3s ease;
+                    color: white;
+                    background: $primary-color;
+
+                    &:hover {
+                        background: $hover-color;
+                        transform: translateY(-2px);
+                    }
+
+                    &.update {
+                        background: #FF5722;
+
+                        &:hover {
+                            background: #E64A19;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+.rs-picker-popup {
+    z-index: 10000000 !important;
+}
